@@ -45,22 +45,81 @@ router.get('/', (req, res) => {
     })
 
 });
-
+//GET user by id
 router.get('/:id', validateUserId, (req, res) => {
   // do your magic!
+const id = req.params.id
+Usrs.findById(id)
+  .then(useId => {
+    if(useId) {
+      res.status(201).json(useId);
+    } else {
+      res.status(404).json({
+        message: "The ID of the user cannot be found."
+      })
+    }
+  })
+  .catch(err => {
+    res.status(500).json({
+      message: "error retrieving the ID of the User"
+    })
+  })
 
 });
-
-router.get('/:id/posts', (req, res) => {
+//GET posts by user id
+router.get('/:id/posts', validateUserId, (req, res) => {
   // do your magic!
+  const id = req.params.id
+  Usrs.getUserPosts(id)
+    .then(userPost => {
+      res.status(201).json(userPost)
+    })
+    .catch(err => {
+      console.log(err)
+      res.status(500).json({
+        message: "There has been an error getting the posts for the User."
+      })
+    })
 });
-
+//Remove a user by id
 router.delete('/:id', (req, res) => {
   // do your magic!
-});
+  const id = req.params.id
+  Usrs.remove(id)
+    .then(vaporize => {
+      if(vaporize) 
+        res.status(200).json(vaporize)
+      else 
+      res.status(404).json({ message: 'The User could not be found' });
 
+    })
+    .catch(err => {
+      console.log(err)
+      res.status(500).json({
+        message: "Error removing the User"
+      })
+    })
+});
+//Edit a user by id
 router.put('/:id', (req, res) => {
   // do your magic!
+  const id = req.params.id
+  const user = req.body
+  Usrs.update(id, user)
+    .then(urId => {
+      if(urId)
+        res.status(200).json(urId);
+      else
+        res.status(404).json({
+          message: "The User could not be found"
+        })
+    })
+    .catch(err => {
+      console.log(err)
+      res.status(500).json({
+        message: "Error updating the hub"
+      })
+    })
 });
 
 //custom middleware

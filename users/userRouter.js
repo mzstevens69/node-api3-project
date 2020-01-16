@@ -4,12 +4,22 @@ const router = express.Router();
 
 const Posts = require("../posts/postDb")
 const Usrs = require("./userDb");
-router.post('/', (req, res) => {
+router.post('/', validateUser, (req, res) => {
   // do your magic!
+  Usrs.insert(req.body)
+    .then(addUser => {
+      res.status(201).json(addUser)
+    })
+    .catch(error => {
+      res.status(500).json({
+        error: "There was an error while saving the comment to the database."
+      });
+    });
 });
 
-router.post('/:id/posts', (req, res) => {
+router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
   // do your magic!
+  Posts.insert
 });
 
 router.get('/', (req, res) => {

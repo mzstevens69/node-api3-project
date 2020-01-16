@@ -1,21 +1,25 @@
 const express = require('express');
 
-const router = express.Router();
+const router = require("express").Router();
 
 const Posts = require("../posts/postDb")
+
 const Usrs = require("./userDb");
+
 //POST add new Users
 router.post('/', validateUser, (req, res) => {
   // do your magic!
+  
   Usrs.insert(req.body)
     .then(addUser => {
       res.status(201).json(addUser)
     })
     .catch(error => {
       res.status(500).json({
-        error: "There was an error while saving the comment to the database."
-      });
-    });
+        error: "There was an error while saving the User to the database."
+      })
+    })
+    
 });
 // POST add new Posts
 router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
@@ -26,6 +30,7 @@ router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
       res.status(201).json(addPost)
     })
     .catch(err => {
+      console.log("addpost err",err)
       res.status(500).json({
         error: "There was an error while saving the comment to the databse."
       })
@@ -39,6 +44,7 @@ router.get('/', (req, res) => {
       res.status(201).json(user)
     })
     .catch(err => {
+      console.log(err)
       res.status(500).json({
         error: "Could not retrieve the users"
       })
@@ -49,7 +55,7 @@ router.get('/', (req, res) => {
 router.get('/:id', validateUserId, (req, res) => {
   // do your magic!
 const id = req.params.id
-Usrs.findById(id)
+Usrs.getById(id)
   .then(useId => {
     if(useId) {
       res.status(201).json(useId);
@@ -60,6 +66,7 @@ Usrs.findById(id)
     }
   })
   .catch(err => {
+    console.log(err)
     res.status(500).json({
       message: "error retrieving the ID of the User"
     })
@@ -72,7 +79,10 @@ router.get('/:id/posts', validateUserId, (req, res) => {
   const id = req.params.id
   Usrs.getUserPosts(id)
     .then(userPost => {
+      if(userPost)
       res.status(201).json(userPost)
+      else 
+      res.status(404).json({ errorMessage: "The Users post does not exist."})
     })
     .catch(err => {
       console.log(err)
@@ -133,39 +143,36 @@ function validateUserId(req, res, next) {
       req.user = valuser;
       next();
                
-  } else {
+    } else {
       res.status(400).json(
         { message: "invalid user id" }
       )
-  }
-})
+     }
+    })
     .catch(error => {
       res.status(500).json({
         error: "There was an error with the database."
       })
     })
-      
+}    
     
 
 function validateUser(req, res, next) {
   // do your magic!
-  const User = req.body;
-  const { name } = User;
-    if(User) {
-      if(name) {
+  
+      if(req.body.text) {
         next();
-      } else {
+      } else if(!req.body.text) {
         res.status(400).json({
-          message: "missing required text field"
+          errorMessage: "missing required text field"
         });
-      }
-    } else {
-      res.status(400).json({
-        message: "missing user data"
-      })
-      }
-    }
+      } else {    
+          res.status(400).json({
+            errorMessage: "missing user data"
+            })
+        }
 }
+
 
 function validatePost(req, res, next) {
   // do your magic!

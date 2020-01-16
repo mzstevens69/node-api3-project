@@ -4,6 +4,7 @@ const router = express.Router();
 
 const Posts = require("../posts/postDb")
 const Usrs = require("./userDb");
+//POST add new Users
 router.post('/', validateUser, (req, res) => {
   // do your magic!
   Usrs.insert(req.body)
@@ -16,18 +17,38 @@ router.post('/', validateUser, (req, res) => {
       });
     });
 });
-
+// POST add new Posts
 router.post('/:id/posts', validateUserId, validatePost, (req, res) => {
   // do your magic!
-  Posts.insert
+  const pstId = req.body;
+  Posts.insert(pstId)
+    .then(addPost => {
+      res.status(201).json(addPost)
+    })
+    .catch(err => {
+      res.status(500).json({
+        error: "There was an error while saving the comment to the databse."
+      })
+    })
 });
-
+// GET array of users
 router.get('/', (req, res) => {
   // do your magic!
+  Usrs.get(req.query)
+    .then(user => {
+      res.status(201).json(user)
+    })
+    .catch(err => {
+      res.status(500).json({
+        error: "Could not retrieve the users"
+      })
+    })
+
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', validateUserId, (req, res) => {
   // do your magic!
+
 });
 
 router.get('/:id/posts', (req, res) => {
